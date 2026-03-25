@@ -9,10 +9,10 @@ export default function LoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Buradaki 'sanat123' senin geçici şifren hocam, istersen değiştirebilirsin.
+    // Şifreniz: sanat123
     if (password === "sanat123") {
       localStorage.setItem("isLoggedIn", "true");
-      router.push("/"); // Şifre doğruysa ana sayfaya (panele) gönderir.
+      router.push("/"); 
     } else {
       setError("Hatalı şifre! Lütfen tekrar deneyin.");
     }
@@ -35,7 +35,7 @@ export default function LoginPage() {
             className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition"
           >
             Giriş Yap
-          }
+          </button>
         </form>
         {error && <p className="text-red-500 mt-4 text-sm font-medium">{error}</p>}
       </div>
