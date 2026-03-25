@@ -1,137 +1,68 @@
 "use client";
-import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import { Plus, Trash2, Clock, BookOpen, X } from 'lucide-react';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-export default function ProgramPage() {
-  const [programs, setPrograms] = useState<any[]>([]);
-  const [students, setStudents] = useState<any[]>([]);
-  const [teachers, setTeachers] = useState<any[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newProgram, setNewProgram] = useState({ 
-    student_id: '', 
-    teacher_id: '', 
-    lesson_day: 'Pazartesi', 
-    lesson_time: '' 
-  });
+export default function AdminLoginPage() {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
 
-  const days = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
-
-  const fetchData = async () => {
-    const { data: progData } = await supabase.from('program').select('*').order('lesson_day');
-    const { data: stuData } = await supabase.from('students').select('id, name');
-    const { data: teachData } = await supabase.from('teachers').select('id, name, branch');
-    setPrograms(progData || []);
-    setStudents(stuData || []);
-    setTeachers(teachData || []);
-  };
-
-  useEffect(() => { fetchData(); }, []);
-
-  const deleteProgram = async (id: string) => {
-    if (!id) return;
-    const confirmDelete = window.confirm("Bu ders programını silmek istediğinize emin misiniz?");
-    if (confirmDelete) {
-      const { error } = await supabase.from('program').delete().eq('id', id);
-      if (error) {
-        alert("Silme hatası: " + error.message);
-      } else {
-        setPrograms(prev => prev.filter(p => p.id !== id));
-      }
-    }
-  };
-
-  const handleSave = async () => {
-    if (!newProgram.student_id || !newProgram.teacher_id || !newProgram.lesson_time) {
-      alert("Lütfen tüm alanları doldurun!");
-      return;
-    }
-    const selectedStudent = students.find(s => s.id === newProgram.student_id);
-    const selectedTeacher = teachers.find(t => t.id === newProgram.teacher_id);
-
-    const { error } = await supabase.from('program').insert([{
-      student_id: newProgram.student_id,
-      teacher_id: newProgram.teacher_id,
-      lesson_day: newProgram.lesson_day,
-      lesson_time: newProgram.lesson_time,
-      student_name: selectedStudent?.name,
-      teacher_name: selectedTeacher?.name,
-      course_name: selectedTeacher?.branch || "Genel Sanat Dersi"
-    }]);
-
-    if (!error) {
-      setIsModalOpen(false);
-      setNewProgram({ student_id: '', teacher_id: '', lesson_day: 'Pazartesi', lesson_time: '' });
-      fetchData();
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // ŞİFRE: sanat123 (Burayı istediğin zaman değiştirebilirsin hocam)
+    if (password === "sanat123") {
+      localStorage.setItem("isLoggedIn", "true");
+      // Şifre doğruysa ana sayfadaki ders programına gönderir
+      router.push("/"); 
+    } else {
+      setError("Hatalı şifre! Lütfen tekrar deneyin.");
     }
   };
 
   return (
-    <div className="p-8 text-slate-800">
-      <div className="flex justify-between items-center mb-10">
-        <div>
-          <h1 className="text-3xl font-black uppercase italic tracking-tighter">Ders Programı</h1>
-          <p className="text-slate-400 font-bold text-xs uppercase tracking-widest mt-1">Toplam {programs.length} Ders</p>
-        </div>
-        <button onClick={() => setIsModalOpen(true)} className="bg-blue-600 text-white px-8 py-4 rounded-[2rem] font-black flex items-center gap-2">
-          <Plus size={22} /> Program Oluştur
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {programs.map(prog => (
-          <div key={prog.id} className="bg-white p-6 rounded-[3rem] border border-slate-100 shadow-sm relative group overflow-hidden">
-            <button 
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); deleteProgram(prog.id); }}
-              className="absolute top-4 right-4 p-3 bg-red-50 text-red-400 hover:bg-red-500 hover:text-white rounded-2xl transition-all z-50"
-            >
-              <Trash2 size={20} className="pointer-events-none" />
-            </button>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="bg-blue-50 px-4 py-2 rounded-2xl text-blue-600 font-black text-sm">{prog.lesson_day}</div>
-              <div className="bg-slate-900 px-4 py-2 rounded-2xl text-white font-black text-sm">{prog.lesson_time}</div>
-            </div>
-            <h3 className="text-xl font-black text-slate-900 uppercase italic mb-2">{prog.student_name}</h3>
-            <div className="flex flex-col gap-2 mt-4">
-              <div className="flex items-center gap-2 text-slate-500 font-bold text-xs uppercase">
-                <BookOpen size={14} className="text-blue-500"/> {prog.course_name}
-              </div>
-              <div className="text-slate-400 font-bold text-[10px] uppercase border-t border-slate-50 pt-3">
-                Eğitmen: <span className="text-slate-700">{prog.teacher_name}</span>
-              </div>
-            </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 font-sans">
+      <div className="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md text-center border border-gray-200">
+        <div className="mb-6">
+          <div className="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
           </div>
-        ))}
-      </div>
-
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-[100]">
-          <div className="bg-white p-10 rounded-[3.5rem] w-full max-w-md shadow-2xl relative">
-            <button onClick={() => setIsModalOpen(false)} className="absolute top-8 right-8 text-slate-300"><X size={24}/></button>
-            <h2 className="text-2xl font-black mb-8 text-blue-600 uppercase italic">Yeni Program</h2>
-            <div className="space-y-5">
-              <select className="w-full bg-slate-50 p-4 rounded-2xl border-2 border-slate-50 font-bold text-black" onChange={e => setNewProgram({...newProgram, student_id: e.target.value})}>
-                <option value="">Öğrenci Seçiniz</option>
-                {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-              <select className="w-full bg-slate-50 p-4 rounded-2xl border-2 border-slate-50 font-bold text-black" onChange={e => setNewProgram({...newProgram, teacher_id: e.target.value})}>
-                <option value="">Hoca Seçiniz</option>
-                {teachers.map(t => <option key={t.id} value={t.id}>{t.name} ({t.branch})</option>)}
-              </select>
-              <div className="grid grid-cols-2 gap-4">
-                <select className="bg-slate-50 p-4 rounded-2xl border-2 border-slate-50 font-bold text-black" value={newProgram.lesson_day} onChange={e => setNewProgram({...newProgram, lesson_day: e.target.value})}>
-                  {days.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
-                <input type="time" className="bg-slate-50 p-4 rounded-2xl border-2 border-slate-50 font-bold text-black" onChange={e => setNewProgram({...newProgram, lesson_time: e.target.value})} />
-              </div>
-            </div>
-            <div className="flex gap-4 mt-10">
-              <button onClick={() => setIsModalOpen(false)} className="flex-1 font-bold text-slate-400">Vazgeç</button>
-              <button onClick={handleSave} className="flex-[2] bg-blue-600 text-white p-5 rounded-[2rem] font-black">KAYDET</button>
-            </div>
-          </div>
+          <h1 className="text-3xl font-extrabold text-gray-900">Yönetim Paneli</h1>
+          <p className="text-gray-500 mt-2">Lütfen giriş şifresini yazınız</p>
         </div>
-      )}
+
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div>
+            <input
+              type="password"
+              placeholder="Giriş Şifresi"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black transition-all"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 active:scale-95 transition-all shadow-md"
+          >
+            Giriş Yap
+          </button>
+        </form>
+
+        {error && (
+          <div className="mt-4 p-3 bg-red-50 rounded-lg border border-red-200">
+            <p className="text-red-600 text-sm font-semibold">{error}</p>
+          </div>
+        )}
+
+        <div className="mt-8 text-sm text-gray-400">
+          © 2026 Sanat Kursu v2 - Tüm Hakları Saklıdır
+        </div>
+      </div>
     </div>
   );
 }
